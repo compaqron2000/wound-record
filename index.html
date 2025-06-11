@@ -370,7 +370,7 @@
         async function getIcd10ForMultipleRecords(recordsToQuery) {
             if (recordsToQuery.length === 0) return [];
             const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
-            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas. If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
+            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas.if "chest" is mentioned, it refers to thorax, not breast.If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
