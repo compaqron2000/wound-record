@@ -204,8 +204,8 @@
                   </button>
                 </div>
                 <div class="flex px-4 py-3 justify-end">
-                  <button id="copy-records-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#1993e5] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                    <span class="truncate">Copy Wound Records</span>
+                  <button id="copy-final-report-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#1993e5] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
+                    <span class="truncate">Copy Final Report</span>
                   </button>
                 </div>
             </div>
@@ -327,6 +327,10 @@
         
         async function searchNihIcd10Api(query) {
             let searchTerms = query.replace(/^- /, "").trim();
+            // Refine search for head to avoid ambiguity
+            if (searchTerms.toLowerCase().includes('head')) {
+               searchTerms = searchTerms.replace(/head/i, 'unspecified part of head');
+            }
             searchTerms += " initial encounter";
             const url = `https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search?sf=code,name&terms=${encodeURIComponent(searchTerms)}`;
             try {
@@ -347,11 +351,11 @@
         async function getIcd10ForMultipleRecords(recordsToQuery) {
             if (recordsToQuery.length === 0) return [];
             const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
-            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
+            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas. If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = ""; 
+                const apiKey = "AIzaSyBv8xPED2-g89P3BUOsSvF-2DKFLQNQ0B8"; // <--- 在這裡貼上您的 Gemini API 金鑰
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
@@ -510,10 +514,10 @@
             }
         });
 
-        $("#copy-records-btn").on("click", function() {
-            const reportText = woundRecordObjects.map(r => r.displayText).join("");
-            if (!reportText) {
-                showAlert("There are no wound records to copy.");
+        $("#copy-final-report-btn").on("click", function() {
+            const reportText = $("#final-report-display").text();
+            if (reportText.startsWith("Click") || !reportText) {
+                showAlert("There is no final report to copy.");
                 return;
             }
             const tempTextArea = document.createElement("textarea");
@@ -523,7 +527,7 @@
             tempTextArea.setSelectionRange(0, 99999);
             try {
                 document.execCommand('copy');
-                showAlert("Wound records have been copied to clipboard!");
+                showAlert("Final report has been copied to clipboard!");
             } catch (err) {
                 console.error("Copy failed: ", err);
                 showAlert("Failed to copy records. Please try again or copy manually.");
