@@ -370,11 +370,11 @@
         async function getIcd10ForMultipleRecords(recordsToQuery) {
             if (recordsToQuery.length === 0) return [];
             const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
-            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas. If you cannot find a code, respond with "Not Found".Choose trauma related ICD10 code first.\n\n${promptText}`;
+            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas. If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = ""; /AIzaSyBv8xPED2-g89P3BUOsSvF-2DKFLQNQ0B8/ <--- 在這裡貼上您的 Gemini API 金鑰
+                const apiKey = "AIzaSyBv8xPED2-g89P3BUOsSvF-2DKFLQNQ0B8"; // <--- 在這裡貼上您的 Gemini API 金鑰
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
