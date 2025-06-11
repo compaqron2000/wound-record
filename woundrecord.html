@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&family=Space+Grotesk%3Awght%40400%3B500%3B700"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stitch Design</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    
+    <style>
+      /* --- Custom Styles --- */
+      .wound-type-label {
+        transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+      }
+      .wound-type-label span {
+        transition: color 0.2s ease-in-out;
+      }
+      .wound-type-label:has(input[type="radio"]:checked) {
+        background-color: #1993e5;
+        border-color: #1993e5;
+      }
+      .wound-type-label:has(input[type="radio"]:checked) span {
+        color: #fff;
+      }
+      .wound-type-label input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+      }
+      .modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        max-width: 90%;
+        width: 400px;
+        text-align: center;
+      }
+      .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .modal-button {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+      }
+      .modal-button.primary {
+        background-color: #1993e5;
+        color: #fff;
+      }
+      .modal-button.primary:hover {
+        background-color: #147ac2;
+      }
+      .modal-button.secondary {
+        background-color: #e7eef3;
+        color: #0e161b;
+        border: 1px solid #d0dee7;
+      }
+      .modal-button.secondary:hover {
+        background-color: #dbe2e9;
+      }
+      .hidden {
+        display: none;
+      }
+      #wound-records-display {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem; /* Reduced gap between items */
+      }
+      .record-item {
+         padding-top: 0.25rem;
+         padding-bottom: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="relative flex size-full min-h-screen flex-col bg-slate-50 group/design-root overflow-x-hidden"
+      style='font-family: "Space Grotesk", "Noto Sans", sans-serif;'
+    >
+      <div class="layout-container flex h-full grow flex-col px-6 py-5">
+        <div class="flex flex-wrap -mx-4">
+            
+            <!-- Left Column: Inputs -->
+            <div class="w-full lg:w-1/2 px-4">
+                <div class="flex flex-wrap justify-between gap-3 p-4">
+                  <div class="flex min-w-72 flex-col gap-3">
+                    <p class="text-[#0e161b] tracking-light text-[32px] font-bold leading-tight">
+                      Patient Wound Record
+                    </p>
+                    <p class="text-[#4e7a97] text-sm font-normal leading-normal">
+                      Fill out the form, then generate ICD-10 codes for all records.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Wound Details Section -->
+                <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+                  Wound Details
+                </h3>
+                <div class="flex flex-col gap-4 p-4">
+                  <!-- Dropdowns for Side, Region, Part -->
+                  <div class="flex flex-col">
+                    <label class="text-base font-medium leading-normal text-[#0e161b]">Side:</label>
+                    <select id="side-select" class="form-select w-full rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0">
+                      <option value="Select Side">Select Side</option>
+                      <option value="N/A">N/A</option>
+                      <option value="Left">Left</option>
+                      <option value="Right">Right</option>
+                    </select>
+                  </div>
+                  <div class="flex flex-col">
+                    <label class="text-base font-medium leading-normal text-[#0e161b]">Body Region:</label>
+                    <select id="body-region-select" class="form-select w-full rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0">
+                      <option value="Select Region">Select Region</option>
+                    </select>
+                  </div>
+                  <div class="flex flex-col">
+                    <label class="text-base font-medium leading-normal text-[#0e161b]">Specific Part:</label>
+                    <select id="specific-body-part-select" class="form-select w-full rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0" disabled>
+                      <option value="Select Part">Select Part</option>
+                    </select>
+                  </div>
+                  <!-- Wound Type Radios -->
+                  <div class="flex flex-col">
+                    <label class="text-base font-medium leading-normal text-[#0e161b]">Wound Type:</label>
+                    <div id="wound-type-radios" class="flex flex-wrap gap-3 py-2"></div>
+                  </div>
+                  <!-- Wound Description Textareas -->
+                  <div id="wound-description-fields" class="flex flex-col gap-3"></div>
+                  <button id="add-another-wound-description-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e7eef3] text-[#0e161b] text-base font-bold leading-normal tracking-[0.015em] self-start">
+                    <span class="truncate">Add Another Wound Description</span>
+                  </button>
+                </div>
+                <div class="flex px-4 py-3 justify-end">
+                  <button id="add-wound-record-btn" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-[#1993e5] text-slate-50 text-xl font-bold leading-normal tracking-[0.015em]">
+                    <span class="truncate">Add Wound Record</span>
+                  </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Outputs -->
+            <div class="w-full lg:w-1/2 px-4">
+                <!-- Wound Records Section -->
+                <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4 lg:pt-24">
+                  Wound Records
+                </h3>
+                <div id="wound-records-container" class="text-[#0e161b] text-base font-normal leading-normal h-48 border border-[#d0dee7] rounded-xl bg-slate-50 overflow-y-auto px-2">
+                    <div id="wound-records-display">No records added yet.</div>
+                </div>
+
+                <!-- Generate ICD-10 Button -->
+                <div class="flex px-4 py-3 justify-center">
+                  <button id="generate-icd-btn" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-[#18629c] text-slate-50 text-xl font-bold leading-normal tracking-[0.015em]">
+                    <span class="truncate">Generate ICD-10</span>
+                  </button>
+                </div>
+
+                <!-- Final Report Section -->
+                <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+                    Final Report with ICD-10
+                </h3>
+                <div id="final-report-display" class="text-[#0e161b] text-base font-normal leading-normal pb-3 pt-1 px-4 min-h-36 border border-[#d0dee7] rounded-xl bg-slate-50 overflow-auto whitespace-pre-wrap">
+                    Click "Generate ICD-10" after adding records.
+                </div>
+                 <div id="loading-indicator" class="hidden text-center p-4">
+                    <p>Generating ICD-10 codes... Please wait.</p>
+                 </div>
+
+                <!-- Action Buttons -->
+                <div class="flex px-4 py-3 justify-end">
+                  <button id="clear-all-records-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e7eef3] text-[#0e161b] text-sm font-bold leading-normal tracking-[0.015em]">
+                    <span class="truncate">Clear All Records</span>
+                  </button>
+                </div>
+                <div class="flex px-4 py-3 justify-end">
+                  <button id="copy-records-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#1993e5] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
+                    <span class="truncate">Copy Wound Records</span>
+                  </button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="custom-alert-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <p id="custom-alert-message" class="text-[#0e161b] text-lg font-medium leading-normal"></p>
+        <div class="modal-buttons">
+          <button id="custom-alert-ok" class="modal-button primary">OK</button>
+        </div>
+      </div>
+    </div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <p id="custom-confirm-message" class="text-[#0e161b] text-lg font-medium leading-normal"></p>
+        <div class="modal-buttons">
+          <button id="custom-confirm-cancel" class="modal-button secondary">Cancel</button>
+          <button id="custom-confirm-ok" class="modal-button primary">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        // --- Data ---
+        const bodyRegions = ["Torso", "Upper Extremity", "Lower Extremity"];
+        const bodyPartsByRegion = {
+            Torso: ["Head", "Facial", "Neck", "Chest", "Abdomen", "Upper Back", "Lower Back", "Pelvis"],
+            "Upper Extremity": ["Shoulder", "Upper Arm", "Elbow", "Forearm", "Wrist", "Hand", "Finger"],
+            "Lower Extremity": ["Hip", "Thigh", "Knee", "Lower Leg", "Ankle", "Foot", "Toe"],
+        };
+        const woundTypes = ["Abrasion", "Laceration", "Contusion", "Swelling", "Avulsion", "Deformity", "Burn", "Pain but no open wound", "Puncture wound", "Degloving injury"];
+        
+        // --- State ---
+        let woundRecordObjects = [];
+        let woundDescriptionCounter = 0;
+
+        // --- Functions defined in global scope ---
+        function showAlert(message) {
+            $('#custom-alert-message').text(message);
+            $('#custom-alert-modal').removeClass("hidden");
+        }
+
+        function showConfirm(message) {
+            return new Promise((resolve) => {
+                $('#custom-confirm-message').text(message);
+                $('#custom-confirm-modal').removeClass("hidden");
+                const onConfirm = () => cleanup(true);
+                const onCancel = () => cleanup(false);
+                function cleanup(result) {
+                    $("#custom-confirm-ok").off("click", onConfirm);
+                    $("#custom-confirm-cancel").off("click", onCancel);
+                    $('#custom-confirm-modal').addClass("hidden");
+                    resolve(result);
+                }
+                $("#custom-confirm-ok").on("click", onConfirm);
+                $("#custom-confirm-cancel").on("click", onCancel);
+            });
+        }
+        
+        function populateBodyRegionSelect() {
+            bodyRegions.forEach(region => $("#body-region-select").append(`<option value="${region}">${region}</option>`));
+        }
+
+        function updateSpecificBodyPartSelect() {
+            const selectedRegion = $("#body-region-select").val();
+            const $specificBodyPartSelect = $("#specific-body-part-select");
+            $specificBodyPartSelect.html('<option value="Select Part">Select Part</option>').prop("disabled", true);
+            if (selectedRegion !== 'Select Region' && bodyPartsByRegion[selectedRegion]) {
+                bodyPartsByRegion[selectedRegion].forEach(part => $specificBodyPartSelect.append(`<option value="${part}">${part}</option>`));
+                $specificBodyPartSelect.prop("disabled", false);
+            }
+        }
+
+        function populateWoundTypeRadios() {
+            const $woundTypeRadiosContainer = $("#wound-type-radios");
+            $woundTypeRadiosContainer.empty();
+            woundTypes.forEach((type, index) => {
+                const label = `<label class="wound-type-label text-base font-medium leading-normal flex items-center justify-center rounded-xl border border-[#d0dee7] px-4 h-11 text-[#0e161b] relative cursor-pointer">
+                                <input type="radio" name="wound-type" value="${type}" class="absolute opacity-0 w-0 h-0" id="wound-type-${index}">
+                                <span class="flex items-center justify-center w-full h-full">${type}</span>
+                            </label>`;
+                $woundTypeRadiosContainer.append(label);
+            });
+        }
+
+        function addWoundDescriptionField() {
+            woundDescriptionCounter++;
+            const fieldHtml = `<div class="flex flex-col" id="wound-desc-field-${woundDescriptionCounter}">
+                    <label class="text-base font-medium leading-normal text-[#0e161b]">Wound Description ${woundDescriptionCounter}:</label>
+                    <textarea placeholder="Add notes related to the wound" class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0e161b] focus:outline-0 focus:ring-0 border border-[#d0dee7] bg-slate-50 focus:border-[#d0dee7] min-h-24 placeholder:text-[#4e7a97] p-[15px] text-base font-normal leading-normal"></textarea>
+                </div>`;
+            $("#wound-description-fields").append(fieldHtml);
+        }
+
+        function updateWoundRecordsDisplay() {
+            const $woundRecordsDisplay = $("#wound-records-display");
+            $woundRecordsDisplay.empty();
+            if (woundRecordObjects.length === 0) {
+                 $woundRecordsDisplay.text("No records added yet.");
+                 return;
+            }
+            woundRecordObjects.forEach((record, index) => {
+                const recordEl = $(`
+                    <div class="record-item flex items-center justify-between py-1 px-2" id="record-item-${index}">
+                        <span class="flex-grow">${record.displayText.trim()}</span>
+                        <div class="flex-shrink-0">
+                           <button class="edit-record-btn text-blue-500 ml-4 px-2" data-index="${index}">Edit</button>
+                           <button class="delete-record-btn text-red-500 ml-2 px-2" data-index="${index}">Delete</button>
+                        </div>
+                    </div>
+                `);
+                $woundRecordsDisplay.append(recordEl);
+            });
+        }
+        
+        async function searchNihIcd10Api(query) {
+            let searchTerms = query.replace(/^- /, "").trim();
+            searchTerms += " initial encounter";
+            const url = `https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search?sf=code,name&terms=${encodeURIComponent(searchTerms)}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) return null;
+                const data = await response.json();
+                if (data && data[3] && data[3].length > 0) {
+                    const firstResult = data[3][0];
+                    return `${firstResult[0]} - ${firstResult[1]}`;
+                }
+                return null;
+            } catch (error) {
+                console.error("NIH API Error:", error);
+                return null;
+            }
+        }
+
+        async function getIcd10ForMultipleRecords(recordsToQuery) {
+            if (recordsToQuery.length === 0) return [];
+            const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
+            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
+            try {
+                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                   const errorBody = await response.text();
+                   console.error("API Error Response:", errorBody);
+                   return recordsToQuery.map(() => "Gemini API Error");
+                }
+                
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    const textResponse = result.candidates[0].content.parts[0].text.trim();
+                    const lines = textResponse.split('\n');
+                    const results = new Array(recordsToQuery.length).fill("Parsing Error");
+
+                    lines.forEach(line => {
+                        const match = line.match(/^(\d+)\.\s*(.*)/);
+                        if (match) {
+                            const geminiIndex = parseInt(match[1], 10) - 1;
+                            const content = match[2];
+                            if (geminiIndex >= 0 && geminiIndex < results.length) {
+                                results[geminiIndex] = content;
+                            }
+                        }
+                    });
+                     return results;
+                }
+                return recordsToQuery.map(() => "Parsing Error or Not Found");
+            } catch (error) {
+                console.error("Gemini API Call Failed:", error);
+                return recordsToQuery.map(() => "Network or API Call Error");
+            }
+        }
+        
+      $(document).ready(function() {
+        // --- Event Handlers ---
+        $("#body-region-select").on("change", updateSpecificBodyPartSelect);
+        $("#add-another-wound-description-btn").on("click", addWoundDescriptionField);
+        $("#custom-alert-ok").on("click", () => $('#custom-alert-modal').addClass("hidden"));
+
+
+        $("#add-wound-record-btn").on("click", function() {
+            const side = $("#side-select").val();
+            const bodyRegion = $("#body-region-select").val();
+            const specificBodyPart = $("#specific-body-part-select").val();
+            const woundType = $('input[name="wound-type"]:checked').val();
+            const woundDescriptions = $("#wound-description-fields").find("textarea").map((_, el) => $(el).val().trim()).get().filter(d => d);
+
+            if (side === "Select Side" || bodyRegion === "Select Region" || specificBodyPart === "Select Part" || !woundType) {
+                showAlert("Please ensure Side, Body Region, Specific Part, and Wound Type are selected!");
+                return;
+            }
+
+            let finalDisplayPart = specificBodyPart;
+            if (side !== "N/A") finalDisplayPart = `${side} ${specificBodyPart}`;
+            const descriptions = woundDescriptions.length > 0 ? `, ${woundDescriptions.join(", ")}` : "";
+            
+            const recordObject = {
+                displayText: `- ${finalDisplayPart} ${woundType}${descriptions}\n`
+            };
+            woundRecordObjects.push(recordObject);
+            updateWoundRecordsDisplay();
+            
+            $("#wound-description-fields").empty();
+            woundDescriptionCounter = 0;
+            addWoundDescriptionField();
+            $('input[name="wound-type"]:checked').prop('checked', false);
+        });
+
+        $("#wound-records-display").on('click', '.edit-record-btn', function() {
+            const index = $(this).data('index');
+            const recordItem = $(`#record-item-${index}`);
+            const currentText = woundRecordObjects[index].displayText.trim();
+            
+            recordItem.find('.flex-shrink-0').hide();
+            recordItem.find('.flex-grow').replaceWith(`
+                 <input type="text" value="${currentText}" class="edit-input flex-grow form-input rounded-md border-gray-300 shadow-sm">
+            `);
+
+            recordItem.append(`
+                 <div class="flex-shrink-0 edit-actions">
+                    <button class="save-record-btn text-green-500 ml-2 px-2" data-index="${index}">Save</button>
+                    <button class="cancel-edit-btn text-red-500 ml-2 px-2" data-index="${index}">Cancel</button>
+                 </div>
+            `);
+        });
+        
+        $("#wound-records-display").on('click', '.delete-record-btn', function() {
+            const index = $(this).data('index');
+            woundRecordObjects.splice(index, 1);
+            updateWoundRecordsDisplay();
+        });
+
+        $("#wound-records-display").on('click', '.save-record-btn', function() {
+            const index = $(this).data('index');
+            const newText = $(`#record-item-${index} .edit-input`).val().trim() + '\n';
+            woundRecordObjects[index].displayText = newText;
+            updateWoundRecordsDisplay();
+        });
+
+        $("#wound-records-display").on('click', '.cancel-edit-btn', function() {
+            updateWoundRecordsDisplay();
+        });
+
+        $("#generate-icd-btn").on("click", async function() {
+            if (woundRecordObjects.length === 0) {
+                showAlert("Please add at least one wound record first.");
+                return;
+            }
+            $("#loading-indicator").removeClass("hidden");
+            $("#final-report-display").text("Generating...");
+
+            let finalReportEntries = new Array(woundRecordObjects.length);
+            const nihPromises = woundRecordObjects.map(record => searchNihIcd10Api(record.displayText));
+            const nihResults = await Promise.all(nihPromises);
+
+            let recordsForGemini = [];
+            let geminiIndexMap = [];
+
+            nihResults.forEach((result, index) => {
+                if(result) {
+                    finalReportEntries[index] = `ICD-10: ${result}\n`;
+                } else {
+                    recordsForGemini.push(woundRecordObjects[index]);
+                    geminiIndexMap.push(index);
+                }
+            });
+
+            if (recordsForGemini.length > 0) {
+                const geminiResults = await getIcd10ForMultipleRecords(recordsForGemini);
+                geminiResults.forEach((result, i) => {
+                    const originalIndex = geminiIndexMap[i];
+                    finalReportEntries[originalIndex] = `ICD-10: ${result}\n`;
+                });
+            }
+            
+            $("#final-report-display").text(finalReportEntries.join(""));
+            $("#loading-indicator").addClass("hidden");
+        });
+
+        $("#clear-all-records-btn").on("click", async function() {
+            const confirmed = await showConfirm("Are you sure you want to clear all records? This action cannot be undone.");
+            if (confirmed) {
+                woundRecordObjects = [];
+                updateWoundRecordsDisplay();
+                $("#final-report-display").text("Click \"Generate ICD-10\" after adding records.");
+                $("#side-select").val("Select Side");
+                $("#body-region-select").val("Select Region");
+                updateSpecificBodyPartSelect();
+                $('input[name="wound-type"]:checked').prop('checked', false);
+            }
+        });
+
+        $("#copy-records-btn").on("click", function() {
+            const reportText = woundRecordObjects.map(r => r.displayText).join("");
+            if (!reportText) {
+                showAlert("There are no wound records to copy.");
+                return;
+            }
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = reportText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            tempTextArea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showAlert("Wound records have been copied to clipboard!");
+            } catch (err) {
+                console.error("Copy failed: ", err);
+                showAlert("Failed to copy records. Please try again or copy manually.");
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        });
+
+        // --- Initial Setup ---
+        populateBodyRegionSelect();
+        populateWoundTypeRadios();
+        addWoundDescriptionField();
+        updateWoundRecordsDisplay();
+      });
+    </script>
+  </body>
+</html>
