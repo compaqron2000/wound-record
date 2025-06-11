@@ -119,7 +119,7 @@
                       Patient Wound Record
                     </p>
                     <p class="text-[#4e7a97] text-sm font-normal leading-normal">
-                      Fill out the form, then generate ICD-10 codes for all records.
+                      Fill out the form, then generate ICD-10 codes for all records. - Made by YTH
                     </p>
                   </div>
                 </div>
@@ -151,16 +151,21 @@
                       <option value="Select Part">Select Part</option>
                     </select>
                   </div>
-                  <!-- Wound Type Radios -->
+                  <!-- Injury Type Radios -->
                   <div class="flex flex-col">
-                    <label class="text-base font-medium leading-normal text-[#0e161b]">Wound Type:</label>
-                    <div id="wound-type-radios" class="flex flex-wrap gap-3 py-2"></div>
+                    <label class="text-base font-medium leading-normal text-[#0e161b]">Injury Type:</label>
+                    <div id="injury-type-radios" class="flex flex-wrap gap-3 py-2"></div>
                   </div>
                   <!-- Wound Description Textareas -->
                   <div id="wound-description-fields" class="flex flex-col gap-3"></div>
-                  <button id="add-another-wound-description-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e7eef3] text-[#0e161b] text-base font-bold leading-normal tracking-[0.015em] self-start">
-                    <span class="truncate">Add Another Wound Description</span>
-                  </button>
+                   <div class="flex flex-wrap gap-4">
+                        <button id="add-another-wound-description-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e7eef3] text-[#0e161b] text-base font-bold leading-normal tracking-[0.015em] self-start">
+                            <span class="truncate">Add Another Wound Description</span>
+                        </button>
+                        <button id="add-custom-entry-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-yellow-200 hover:bg-yellow-300 text-yellow-800 text-base font-bold leading-normal tracking-[0.015em] self-start">
+                            <span class="truncate">Other (Manual key in)</span>
+                        </button>
+                   </div>
                 </div>
                 <div class="flex px-4 py-3 justify-end">
                   <button id="add-wound-record-btn" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-[#1993e5] text-slate-50 text-xl font-bold leading-normal tracking-[0.015em]">
@@ -204,8 +209,8 @@
                   </button>
                 </div>
                 <div class="flex px-4 py-3 justify-end">
-                  <button id="copy-final-report-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#1993e5] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                    <span class="truncate">Copy Final Report</span>
+                  <button id="copy-records-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-teal-600 hover:bg-teal-700 text-slate-50 text-lg font-bold leading-normal tracking-[0.015em]">
+                    <span class="truncate">Copy Wound Records</span>
                   </button>
                 </div>
             </div>
@@ -240,7 +245,7 @@
             "Upper Extremity": ["Shoulder", "Upper Arm", "Elbow", "Forearm", "Wrist", "Hand", "Finger"],
             "Lower Extremity": ["Hip", "Thigh", "Knee", "Lower Leg", "Ankle", "Foot", "Toe"],
         };
-        const woundTypes = ["Abrasion", "Laceration", "Contusion", "Swelling", "Avulsion", "Deformity", "Burn", "Pain but no open wound", "Puncture wound", "Degloving injury"];
+        const injuryTypes = ["Abrasion", "Contusion", "Laceration", "Swelling", "Deformity", "Avulsion", "Fracture", "Burn", "Puncture wound", "Degloving injury", "Pain but no open wound"];
         
         // --- State ---
         let woundRecordObjects = [];
@@ -283,21 +288,22 @@
             }
         }
 
-        function populateWoundTypeRadios() {
-            const $woundTypeRadiosContainer = $("#wound-type-radios");
-            $woundTypeRadiosContainer.empty();
-            woundTypes.forEach((type, index) => {
+        function populateInjuryRadios() {
+            const $injuryTypeRadiosContainer = $("#injury-type-radios");
+            $injuryTypeRadiosContainer.empty();
+            
+            injuryTypes.forEach((type) => {
                 const label = `<label class="wound-type-label text-base font-medium leading-normal flex items-center justify-center rounded-xl border border-[#d0dee7] px-4 h-11 text-[#0e161b] relative cursor-pointer">
-                                <input type="radio" name="wound-type" value="${type}" class="absolute opacity-0 w-0 h-0" id="wound-type-${index}">
+                                <input type="radio" name="injury-type" value="${type}" class="absolute opacity-0 w-0 h-0">
                                 <span class="flex items-center justify-center w-full h-full">${type}</span>
                             </label>`;
-                $woundTypeRadiosContainer.append(label);
+                $injuryTypeRadiosContainer.append(label);
             });
         }
 
         function addWoundDescriptionField() {
             woundDescriptionCounter++;
-            const fieldHtml = `<div class="flex flex-col" id="wound-desc-field-${woundDescriptionCounter}">
+            const fieldHtml = `<div class="flex flex-col w-full" id="wound-desc-field-${woundDescriptionCounter}">
                     <label class="text-base font-medium leading-normal text-[#0e161b]">Wound Description ${woundDescriptionCounter}:</label>
                     <textarea placeholder="Add notes related to the wound" class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0e161b] focus:outline-0 focus:ring-0 border border-[#d0dee7] bg-slate-50 focus:border-[#d0dee7] min-h-24 placeholder:text-[#4e7a97] p-[15px] text-base font-normal leading-normal"></textarea>
                 </div>`;
@@ -308,17 +314,31 @@
             const $woundRecordsDisplay = $("#wound-records-display");
             $woundRecordsDisplay.empty();
             if (woundRecordObjects.length === 0) {
-                 $woundRecordsDisplay.text("No records added yet.");
+                 $woundRecordsDisplay.html('<div class="p-2">No records added yet.</div>');
                  return;
             }
             woundRecordObjects.forEach((record, index) => {
-                const recordEl = $(`
-                    <div class="record-item flex items-center justify-between py-1 px-2" id="record-item-${index}">
+                let content;
+                if (record.isEditing) {
+                    content = `
+                        <input type="text" value="${record.displayText.replace(/^- /, "").trim()}" class="edit-input flex-grow form-input rounded-md border-gray-300 shadow-sm">
+                        <div class="flex-shrink-0 edit-actions">
+                            <button class="save-record-btn text-green-500 ml-2 px-2" data-index="${index}">Save</button>
+                            <button class="delete-record-btn text-red-500 ml-2 px-2" data-index="${index}">Delete</button>
+                        </div>
+                    `;
+                } else {
+                     content = `
                         <span class="flex-grow">${record.displayText.trim()}</span>
                         <div class="flex-shrink-0">
                            <button class="edit-record-btn text-blue-500 ml-4 px-2" data-index="${index}">Edit</button>
                            <button class="delete-record-btn text-red-500 ml-2 px-2" data-index="${index}">Delete</button>
                         </div>
+                    `;
+                }
+                const recordEl = $(`
+                    <div class="record-item flex items-center justify-between py-1 px-2" id="record-item-${index}">
+                        ${content}
                     </div>
                 `);
                 $woundRecordsDisplay.append(recordEl);
@@ -327,7 +347,6 @@
         
         async function searchNihIcd10Api(query) {
             let searchTerms = query.replace(/^- /, "").trim();
-            // Refine search for head to avoid ambiguity
             if (searchTerms.toLowerCase().includes('head')) {
                searchTerms = searchTerms.replace(/head/i, 'unspecified part of head');
             }
@@ -351,11 +370,11 @@
         async function getIcd10ForMultipleRecords(recordsToQuery) {
             if (recordsToQuery.length === 0) return [];
             const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
-            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas. If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
+            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas. If you cannot find a code, respond with "Not Found".Choose trauma related ICD10 code first.\n\n${promptText}`;
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyBv8xPED2-g89P3BUOsSvF-2DKFLQNQ0B8"; // <--- 在這裡貼上您的 Gemini API 金鑰
+                const apiKey = ""; /AIzaSyBv8xPED2-g89P3BUOsSvF-2DKFLQNQ0B8/ <--- 在這裡貼上您的 Gemini API 金鑰
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
@@ -406,11 +425,11 @@
             const side = $("#side-select").val();
             const bodyRegion = $("#body-region-select").val();
             const specificBodyPart = $("#specific-body-part-select").val();
-            const woundType = $('input[name="wound-type"]:checked').val();
+            const injuryType = $('input[name="injury-type"]:checked').val();
             const woundDescriptions = $("#wound-description-fields").find("textarea").map((_, el) => $(el).val().trim()).get().filter(d => d);
 
-            if (side === "Select Side" || bodyRegion === "Select Region" || specificBodyPart === "Select Part" || !woundType) {
-                showAlert("Please ensure Side, Body Region, Specific Part, and Wound Type are selected!");
+            if (side === "Select Side" || bodyRegion === "Select Region" || specificBodyPart === "Select Part" || !injuryType) {
+                showAlert("Please ensure Side, Body Region, Specific Part, and an Injury Type are selected!");
                 return;
             }
 
@@ -419,7 +438,7 @@
             const descriptions = woundDescriptions.length > 0 ? `, ${woundDescriptions.join(", ")}` : "";
             
             const recordObject = {
-                displayText: `- ${finalDisplayPart} ${woundType}${descriptions}\n`
+                displayText: `- ${finalDisplayPart} ${injuryType}${descriptions}\n`
             };
             woundRecordObjects.push(recordObject);
             updateWoundRecordsDisplay();
@@ -427,25 +446,25 @@
             $("#wound-description-fields").empty();
             woundDescriptionCounter = 0;
             addWoundDescriptionField();
-            $('input[name="wound-type"]:checked').prop('checked', false);
+            $('input[name="injury-type"]:checked').prop('checked', false);
+        });
+        
+        $('#add-custom-entry-btn').on('click', function() {
+             const newRecord = {
+                displayText: '- ',
+                isEditing: true
+            };
+            woundRecordObjects.push(newRecord);
+            updateWoundRecordsDisplay();
+            // Focus on the new input field
+            $(`#record-item-${woundRecordObjects.length - 1} .edit-input`).focus();
         });
 
         $("#wound-records-display").on('click', '.edit-record-btn', function() {
             const index = $(this).data('index');
-            const recordItem = $(`#record-item-${index}`);
-            const currentText = woundRecordObjects[index].displayText.trim();
-            
-            recordItem.find('.flex-shrink-0').hide();
-            recordItem.find('.flex-grow').replaceWith(`
-                 <input type="text" value="${currentText}" class="edit-input flex-grow form-input rounded-md border-gray-300 shadow-sm">
-            `);
-
-            recordItem.append(`
-                 <div class="flex-shrink-0 edit-actions">
-                    <button class="save-record-btn text-green-500 ml-2 px-2" data-index="${index}">Save</button>
-                    <button class="cancel-edit-btn text-red-500 ml-2 px-2" data-index="${index}">Cancel</button>
-                 </div>
-            `);
+            woundRecordObjects[index].isEditing = true;
+            updateWoundRecordsDisplay();
+            $(`#record-item-${index} .edit-input`).focus();
         });
         
         $("#wound-records-display").on('click', '.delete-record-btn', function() {
@@ -456,12 +475,9 @@
 
         $("#wound-records-display").on('click', '.save-record-btn', function() {
             const index = $(this).data('index');
-            const newText = $(`#record-item-${index} .edit-input`).val().trim() + '\n';
-            woundRecordObjects[index].displayText = newText;
-            updateWoundRecordsDisplay();
-        });
-
-        $("#wound-records-display").on('click', '.cancel-edit-btn', function() {
+            const newText = $(`#record-item-${index} .edit-input`).val().trim();
+            woundRecordObjects[index].displayText = (newText.startsWith('-') ? newText : `- ${newText}`) + '\n';
+            woundRecordObjects[index].isEditing = false;
             updateWoundRecordsDisplay();
         });
 
@@ -510,14 +526,14 @@
                 $("#side-select").val("Select Side");
                 $("#body-region-select").val("Select Region");
                 updateSpecificBodyPartSelect();
-                $('input[name="wound-type"]:checked').prop('checked', false);
+                $('input[name="injury-type"]:checked').prop('checked', false);
             }
         });
 
-        $("#copy-final-report-btn").on("click", function() {
-            const reportText = $("#final-report-display").text();
-            if (reportText.startsWith("Click") || !reportText) {
-                showAlert("There is no final report to copy.");
+        $("#copy-records-btn").on("click", function() {
+            const reportText = woundRecordObjects.map(r => r.displayText.trim()).join("\n");
+            if (!reportText) {
+                showAlert("There are no wound records to copy.");
                 return;
             }
             const tempTextArea = document.createElement("textarea");
@@ -527,7 +543,7 @@
             tempTextArea.setSelectionRange(0, 99999);
             try {
                 document.execCommand('copy');
-                showAlert("Final report has been copied to clipboard!");
+                showAlert("Wound records have been copied to clipboard!");
             } catch (err) {
                 console.error("Copy failed: ", err);
                 showAlert("Failed to copy records. Please try again or copy manually.");
@@ -538,7 +554,7 @@
 
         // --- Initial Setup ---
         populateBodyRegionSelect();
-        populateWoundTypeRadios();
+        populateInjuryRadios();
         addWoundDescriptionField();
         updateWoundRecordsDisplay();
       });
