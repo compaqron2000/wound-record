@@ -124,12 +124,12 @@
                   </div>
                 </div>
                 
-                 <!-- API Key Section -->
+                <!-- API Key Section -->
                  <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
                   API Key
                 </h3>
                 <div class="p-4">
-                     <input type="password" id="api-key-input" class="form-input w-full rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0" placeholder="Enter your Gemini API Key here">
+                     <input type="password" id="api-key-input" class="form-input w-full max-w-sm rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0" placeholder="Enter your Gemini API Key here">
                 </div>
 
                 <!-- Chief Complaint Section -->
@@ -179,9 +179,6 @@
                         <button id="add-another-wound-description-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e7eef3] text-[#0e161b] text-base font-bold leading-normal tracking-[0.015em] self-start">
                             <span class="truncate">Add Another Wound Description</span>
                         </button>
-                        <button id="add-custom-entry-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-yellow-200 hover:bg-yellow-300 text-yellow-800 text-base font-bold leading-normal tracking-[0.015em] self-start">
-                            <span class="truncate">Other (Manual key in)</span>
-                        </button>
                    </div>
                 </div>
                 <div class="flex px-4 py-3 justify-end">
@@ -194,10 +191,15 @@
             <!-- Right Column: Outputs -->
             <div class="w-full lg:w-1/2 px-4">
                 <!-- Wound Records Section -->
-                <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4 lg:pt-24">
-                  Wound Records
-                </h3>
-                <div id="wound-records-container" class="text-[#0e161b] text-base font-normal leading-normal h-32 border border-[#d0dee7] rounded-xl bg-slate-50 overflow-y-auto px-2">
+                <div class="flex justify-between items-center px-4 pt-4 lg:pt-24 pb-2">
+                    <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em]">
+                      Wound Records
+                    </h3>
+                    <button id="add-custom-entry-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-yellow-200 hover:bg-yellow-300 text-yellow-800 text-base font-bold leading-normal tracking-[0.015em] self-start">
+                        <span class="truncate">Other (Manual key in)</span>
+                    </button>
+                </div>
+                <div id="wound-records-container" class="text-[#0e161b] text-base font-normal leading-normal h-32 border border-[#d0dee7] rounded-xl bg-slate-50 overflow-y-auto px-2 mx-4">
                     <div id="wound-records-display">No records added yet.</div>
                 </div>
 
@@ -273,14 +275,14 @@
         // --- Data & Templates ---
         const bodyRegions = ["Torso", "Upper Extremity", "Lower Extremity"];
         const bodyPartsByRegion = {
-            Torso: ["Head", "Facial", "Neck", "Chest", "Abdomen", "Upper Back", "Lower Back", "Pelvis"],
+            Torso: ["Head", "Facial", "Neck", "Thorax", "Abdomen", "Upper Back", "Lower Back", "Pelvis"],
             "Upper Extremity": ["Shoulder", "Upper Arm", "Elbow", "Forearm", "Wrist", "Hand", "Finger"],
             "Lower Extremity": ["Hip", "Thigh", "Knee", "Lower Leg", "Ankle", "Foot", "Toe"],
         };
         const injuryTypes = ["Abrasion", "Contusion", "Laceration", "Swelling", "Deformity", "Avulsion", "Fracture", "Burn", "Puncture wound", "Degloving injury", "Pain but no open wound", "Crush injury"];
         
         const chartTemplate = `1. Trauma History
-Mechanism:
+Mechanism: Should generate profressional medical terms and avoid abbreviation.  
 Energy:
 Contamination:
 Wound over:
@@ -437,6 +439,9 @@ All notes should present in english`;
             if (searchTerms.toLowerCase().includes('head')) {
                searchTerms = searchTerms.replace(/head/i, 'unspecified part of head');
             }
+             if (searchTerms.toLowerCase().includes('fracture')) {
+               searchTerms += " non-displaced";
+            }
             searchTerms += " initial encounter";
             const url = `https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search?sf=code,name&terms=${encodeURIComponent(searchTerms)}`;
             try {
@@ -457,7 +462,7 @@ All notes should present in english`;
         async function getIcd10ForMultipleRecords(recordsToQuery, apiKey) {
             if (recordsToQuery.length === 0) return [];
             const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
-            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas.if "chest" is mentioned, it refers to thorax, not breast.If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
+            const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Assume fractures are non-displaced unless specified otherwise. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas.if "chest" is mentioned, it refers to thorax, not breast.If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
