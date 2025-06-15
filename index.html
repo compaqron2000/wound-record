@@ -123,6 +123,23 @@
                     </p>
                   </div>
                 </div>
+                
+                 <!-- API Key Section -->
+                 <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+                  API Key
+                </h3>
+                <div class="p-4">
+                     <input type="password" id="api-key-input" class="form-input w-full rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0" placeholder="Enter your Gemini API Key here">
+                </div>
+
+                <!-- Chief Complaint Section -->
+                <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+                  Chief Complaint
+                </h3>
+                <div class="p-4">
+                    <textarea id="chief-complaint" class="form-input w-full min-h-24 rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0" placeholder="Enter patient's chief complaint (e.g., fall from stairs, chest pain)..."></textarea>
+                </div>
+
 
                 <!-- Wound Details Section -->
                 <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
@@ -154,7 +171,7 @@
                   <!-- Injury Type Radios -->
                   <div class="flex flex-col">
                     <label class="text-base font-medium leading-normal text-[#0e161b]">Injury Type:</label>
-                    <div id="injury-type-radios" class="flex flex-wrap gap-3 py-2"></div>
+                    <div id="injury-type-radios" class="flex flex-wrap gap-2 py-2"></div>
                   </div>
                   <!-- Wound Description Textareas -->
                   <div id="wound-description-fields" class="flex flex-col gap-3"></div>
@@ -180,7 +197,7 @@
                 <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4 lg:pt-24">
                   Wound Records
                 </h3>
-                <div id="wound-records-container" class="text-[#0e161b] text-base font-normal leading-normal h-48 border border-[#d0dee7] rounded-xl bg-slate-50 overflow-y-auto px-2">
+                <div id="wound-records-container" class="text-[#0e161b] text-base font-normal leading-normal h-32 border border-[#d0dee7] rounded-xl bg-slate-50 overflow-y-auto px-2">
                     <div id="wound-records-display">No records added yet.</div>
                 </div>
 
@@ -198,20 +215,35 @@
                 <div id="final-report-display" class="text-[#0e161b] text-base font-normal leading-normal pb-3 pt-1 px-4 min-h-36 border border-[#d0dee7] rounded-xl bg-slate-50 overflow-auto whitespace-pre-wrap">
                     Click "Generate ICD-10" after adding records.
                 </div>
-                 <div id="loading-indicator" class="hidden text-center p-4">
-                    <p>Generating ICD-10 codes... Please wait.</p>
-                 </div>
-
-                <!-- Action Buttons -->
-                <div class="flex px-4 py-3 justify-end">
-                  <button id="clear-all-records-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e7eef3] text-[#0e161b] text-sm font-bold leading-normal tracking-[0.015em]">
-                    <span class="truncate">Clear All Records</span>
+                
+                <!-- Generate Chart Button -->
+                <div class="flex px-4 py-3 justify-center">
+                  <button id="generate-chart-btn" class="flex w-full max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-blue-800 hover:bg-blue-900 text-slate-50 text-xl font-bold leading-normal tracking-[0.015em]">
+                    <span class="truncate">Generate Chart</span>
                   </button>
                 </div>
-                <div class="flex px-4 py-3 justify-end">
-                  <button id="copy-records-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-teal-600 hover:bg-teal-700 text-slate-50 text-lg font-bold leading-normal tracking-[0.015em]">
-                    <span class="truncate">Copy Wound Records</span>
-                  </button>
+                
+                 <!-- Final Chart Display -->
+                 <h3 class="text-[#0e161b] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+                    Generated Chart Note
+                </h3>
+                <textarea id="final-chart-display" class="form-input w-full min-h-96 rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0 whitespace-pre-wrap" readonly></textarea>
+                <div id="loading-indicator" class="hidden text-center p-4">
+                    <p>Generating... Please wait.</p>
+                </div>
+
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col space-y-3 mt-4 px-4 items-end">
+                     <button id="copy-chart-btn" class="flex w-full max-w-[240px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-green-600 hover:bg-green-700 text-slate-50 text-base font-bold leading-normal tracking-[0.015em]">
+                        <span class="truncate">Copy Chart Note</span>
+                    </button>
+                    <button id="copy-records-btn" class="flex w-full max-w-[240px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-teal-600 hover:bg-teal-700 text-slate-50 text-base font-bold leading-normal tracking-[0.015em]">
+                        <span class="truncate">Copy Wound Records</span>
+                    </button>
+                     <button id="clear-all-records-btn" class="flex w-full max-w-[240px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e7eef3] text-[#0e161b] text-sm font-bold leading-normal tracking-[0.015em]">
+                        <span class="truncate">Clear All Records</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -238,15 +270,70 @@
     </div>
 
     <script>
-        // --- Data ---
+        // --- Data & Templates ---
         const bodyRegions = ["Torso", "Upper Extremity", "Lower Extremity"];
         const bodyPartsByRegion = {
             Torso: ["Head", "Facial", "Neck", "Chest", "Abdomen", "Upper Back", "Lower Back", "Pelvis"],
             "Upper Extremity": ["Shoulder", "Upper Arm", "Elbow", "Forearm", "Wrist", "Hand", "Finger"],
             "Lower Extremity": ["Hip", "Thigh", "Knee", "Lower Leg", "Ankle", "Foot", "Toe"],
         };
-        const injuryTypes = ["Abrasion", "Contusion", "Laceration", "Swelling", "Deformity", "Avulsion", "Fracture", "Burn", "Puncture wound", "Degloving injury", "Pain but no open wound"];
+        const injuryTypes = ["Abrasion", "Contusion", "Laceration", "Swelling", "Deformity", "Avulsion", "Fracture", "Burn", "Puncture wound", "Degloving injury", "Pain but no open wound", "Crush injury"];
         
+        const chartTemplate = `1. Trauma History
+Mechanism:
+Energy:
+Contamination:
+Wound over:
+ps: all the wound exactly generate from wound record and in bullet form.
+No limited joint Range of motion: Free walking
+
+No ILOC, no nasuea, no vomiting , no dizziness, no diplopia
+No neck pain, no chest pain, no dyspnea, no abdominal pain, no limb weakness or numbness
+
+2. PE: 
+Clear consciousness, E4V5M6
+HEENT:
+No hematoma, no otorrhea, no racoon's eye, no battle's sign
+Chest:
+No open wound
+bilateral clear breathing sound, no decreasing breathing sound.
+Abdomen:
+No open wound
+Soft abdomen with no tenderness
+Stable pelvic gridle with no tenderness.
+Limb:
+No limited active ROM.
+Patent distal perfusion, no cyanosis
+Neurological:
+GCS: E4V5M6, clear consciousness
+well orientation
+Muscle power:
+RUL/LUL:5/5
+RLL/LLL:5/5
+DTR: RUL/LUL:++/++ RLL/LLL:++/++
+No Numbness, No paresthesia
+Babinski sign: Bilateral plantar reflex`;
+
+        const mainPromptInstructions = `Please analyze the chief complaint and wound i key in. then stay strictly to the form “trauma history” in the file”Trauma History and PE.txt”.
+The wound form is generate from "wound record" on the webpage.
+
+Review and avoid paradox in the chart.
+(Exp: chest pain , but key  no chest pain in negative finding)
+
+truama present illness should present strict to my form:(
+Mechanism:(Should in english and clear: Example: Scooter driver collision with car with left elbow contusion this morning.)
+Energy: 
+Contamination:(+: id soil contact, dirty, machine crush)
+Wound:
+- all the wound exactly generate from wound record and in bullet form.
+Range of motion: 
+Add associates symptoms in orininal compaint. 
+)
+present PE according to PE on “Trauma History and PE.txt”.
+Automatically add wound present in the history then add in to my PE finding according to body parts. history and PE should relate with my chief complaint
+avoid paradox or unreasonable finding history in PE.
+All notes should present in english`;
+
         // --- State ---
         let woundRecordObjects = [];
         let woundDescriptionCounter = 0;
@@ -305,7 +392,7 @@
             woundDescriptionCounter++;
             const fieldHtml = `<div class="flex flex-col w-full" id="wound-desc-field-${woundDescriptionCounter}">
                     <label class="text-base font-medium leading-normal text-[#0e161b]">Wound Description ${woundDescriptionCounter}:</label>
-                    <textarea placeholder="Add notes related to the wound" class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0e161b] focus:outline-0 focus:ring-0 border border-[#d0dee7] bg-slate-50 focus:border-[#d0dee7] min-h-24 placeholder:text-[#4e7a97] p-[15px] text-base font-normal leading-normal"></textarea>
+                    <textarea placeholder="Add notes related to the wound" class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0e161b] focus:outline-0 focus:ring-0 border border-[#d0dee7] bg-slate-50 focus:border-[#d0dee7] min-h-16 placeholder:text-[#4e7a97] p-[15px] text-base font-normal leading-normal"></textarea>
                 </div>`;
             $("#wound-description-fields").append(fieldHtml);
         }
@@ -367,14 +454,13 @@
             }
         }
 
-        async function getIcd10ForMultipleRecords(recordsToQuery) {
+        async function getIcd10ForMultipleRecords(recordsToQuery, apiKey) {
             if (recordsToQuery.length === 0) return [];
             const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
             const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas.if "chest" is mentioned, it refers to thorax, not breast.If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyBv8xPED2-g89P3BUOsSvF-2DKFLQNQ0B8"; // <--- 在這裡貼上您的 Gemini API 金鑰
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
@@ -412,6 +498,70 @@
                 console.error("Gemini API Call Failed:", error);
                 return recordsToQuery.map(() => "Network or API Call Error");
             }
+        }
+
+        async function generateChartNote() {
+            const apiKey = $("#api-key-input").val().trim();
+            if (!apiKey) {
+                showAlert("Please enter your Gemini API Key before generating a chart.");
+                return;
+            }
+            const chiefComplaint = $("#chief-complaint").val().trim();
+            const woundRecordsText = woundRecordObjects.map(r => r.displayText.trim()).join('\n');
+
+            if (!chiefComplaint) {
+                showAlert("Please enter a chief complaint before generating the chart.");
+                return;
+            }
+
+             $("#loading-indicator").removeClass("hidden");
+             $("#final-chart-display").val("Generating Chart Note...");
+
+            const finalPrompt = `${mainPromptInstructions}
+
+### CHIEF COMPLAINT:
+${chiefComplaint}
+
+### WOUND RECORDS:
+${woundRecordsText}
+
+### FORMAT TEMPLATE TO USE:
+---
+${chartTemplate}
+---
+
+Now, generate the complete and consistent chart note based on all the provided information.`;
+
+            try {
+                 const chatHistory = [{ role: "user", parts: [{ text: finalPrompt }] }];
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                 if (!response.ok) {
+                   const errorBody = await response.text();
+                   throw new Error(`API Error: ${errorBody}`);
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    $("#final-chart-display").val(result.candidates[0].content.parts[0].text.trim());
+                } else {
+                     $("#final-chart-display").val("Failed to generate chart. The API returned an empty response.");
+                }
+
+            } catch (error) {
+                console.error("Chart Generation Failed:", error);
+                $("#final-chart-display").val(`An error occurred while generating the chart: ${error.message}`);
+            } finally {
+                 $("#loading-indicator").addClass("hidden");
+            }
+
         }
         
       $(document).ready(function() {
@@ -456,7 +606,6 @@
             };
             woundRecordObjects.push(newRecord);
             updateWoundRecordsDisplay();
-            // Focus on the new input field
             $(`#record-item-${woundRecordObjects.length - 1} .edit-input`).focus();
         });
 
@@ -482,6 +631,11 @@
         });
 
         $("#generate-icd-btn").on("click", async function() {
+             const apiKey = $("#api-key-input").val().trim();
+            if (!apiKey) {
+                showAlert("Please enter your Gemini API Key before generating ICD-10 codes.");
+                return;
+            }
             if (woundRecordObjects.length === 0) {
                 showAlert("Please add at least one wound record first.");
                 return;
@@ -506,7 +660,7 @@
             });
 
             if (recordsForGemini.length > 0) {
-                const geminiResults = await getIcd10ForMultipleRecords(recordsForGemini);
+                const geminiResults = await getIcd10ForMultipleRecords(recordsForGemini, apiKey);
                 geminiResults.forEach((result, i) => {
                     const originalIndex = geminiIndexMap[i];
                     finalReportEntries[originalIndex] = `ICD-10: ${result}\n`;
@@ -517,12 +671,16 @@
             $("#loading-indicator").addClass("hidden");
         });
 
+        $('#generate-chart-btn').on('click', generateChartNote);
+
         $("#clear-all-records-btn").on("click", async function() {
             const confirmed = await showConfirm("Are you sure you want to clear all records? This action cannot be undone.");
             if (confirmed) {
                 woundRecordObjects = [];
                 updateWoundRecordsDisplay();
                 $("#final-report-display").text("Click \"Generate ICD-10\" after adding records.");
+                 $("#final-chart-display").val("");
+                 $("#chief-complaint").val("");
                 $("#side-select").val("Select Side");
                 $("#body-region-select").val("Select Region");
                 updateSpecificBodyPartSelect();
@@ -547,6 +705,28 @@
             } catch (err) {
                 console.error("Copy failed: ", err);
                 showAlert("Failed to copy records. Please try again or copy manually.");
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        });
+
+        $("#copy-chart-btn").on("click", function() {
+            const chartText = $("#final-chart-display").val();
+             if (!chartText) {
+                showAlert("There is no chart to copy.");
+                return;
+            }
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = chartText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            tempTextArea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showAlert("Chart note has been copied to clipboard!");
+            } catch (err) {
+                console.error("Copy failed: ", err);
+                showAlert("Failed to copy chart. Please try again or copy manually.");
             } finally {
                 document.body.removeChild(tempTextArea);
             }
