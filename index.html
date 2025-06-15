@@ -282,7 +282,7 @@
         const injuryTypes = ["Abrasion", "Contusion", "Laceration", "Swelling", "Deformity", "Avulsion", "Fracture", "Burn", "Puncture wound", "Degloving injury", "Pain but no open wound", "Crush injury"];
         
         const chartTemplate = `1. Trauma History
-Mechanism: Should generate profressional medical terms and avoid abbreviation.  
+Mechanism:
 Energy:
 Contamination:
 Wound over:
@@ -466,7 +466,7 @@ All notes should present in english`;
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
                     method: 'POST',
@@ -502,6 +502,39 @@ All notes should present in english`;
             } catch (error) {
                 console.error("Gemini API Call Failed:", error);
                 return recordsToQuery.map(() => "Network or API Call Error");
+            }
+        }
+        
+         async function getIcd10FromComplaint(complaint, apiKey) {
+            if (!complaint) return null;
+            const prompt = `Analyze the following patient's chief complaint. Identify potential ICD-10 codes for the MECHANISM of injury (e.g., falls, traffic accidents, bites) and any mentioned UNDERLYING DISEASES (e.g., diabetes, hypertension). DO NOT identify codes for the wounds themselves.
+Important Rules:
+1. Respond only with the findings in the format: "ICD-10: CODE - NAME".
+2. If multiple diagnoses are found, list each on a new line.
+3. If no relevant mechanism or disease is found, respond with "No additional diagnoses found."
+4. Always assume it's an initial encounter.
+
+Chief Complaint: "${complaint}"`;
+             try {
+                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) return "Gemini API Error for Chief Complaint.";
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                     const text = result.candidates[0].content.parts[0].text.trim();
+                     return text.toLowerCase() === "no additional diagnoses found." ? null : text;
+                }
+                return null;
+            } catch (error) {
+                console.error("Gemini API Call for Complaint Failed:", error);
+                return "Network or API Call Error for Chief Complaint.";
             }
         }
 
@@ -540,7 +573,7 @@ Now, generate the complete and consistent chart note based on all the provided i
             try {
                  const chatHistory = [{ role: "user", parts: [{ text: finalPrompt }] }];
                 const payload = { contents: chatHistory };
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
                     method: 'POST',
@@ -641,20 +674,19 @@ Now, generate the complete and consistent chart note based on all the provided i
                 showAlert("Please enter your Gemini API Key before generating ICD-10 codes.");
                 return;
             }
-            if (woundRecordObjects.length === 0) {
-                showAlert("Please add at least one wound record first.");
+            if (woundRecordObjects.length === 0 && !$("#chief-complaint").val().trim()) {
+                showAlert("Please add at least one wound record or a chief complaint first.");
                 return;
             }
             $("#loading-indicator").removeClass("hidden");
             $("#final-report-display").text("Generating...");
 
+            // Process wound records
             let finalReportEntries = new Array(woundRecordObjects.length);
             const nihPromises = woundRecordObjects.map(record => searchNihIcd10Api(record.displayText));
             const nihResults = await Promise.all(nihPromises);
-
             let recordsForGemini = [];
             let geminiIndexMap = [];
-
             nihResults.forEach((result, index) => {
                 if(result) {
                     finalReportEntries[index] = `ICD-10: ${result}\n`;
@@ -663,7 +695,6 @@ Now, generate the complete and consistent chart note based on all the provided i
                     geminiIndexMap.push(index);
                 }
             });
-
             if (recordsForGemini.length > 0) {
                 const geminiResults = await getIcd10ForMultipleRecords(recordsForGemini, apiKey);
                 geminiResults.forEach((result, i) => {
@@ -671,8 +702,19 @@ Now, generate the complete and consistent chart note based on all the provided i
                     finalReportEntries[originalIndex] = `ICD-10: ${result}\n`;
                 });
             }
+
+            // Process chief complaint
+            const chiefComplaintText = $("#chief-complaint").val().trim();
+            const complaintIcdResult = await getIcd10FromComplaint(chiefComplaintText, apiKey);
+
+            let combinedReport = "--- Wound Record Diagnoses ---\n";
+            combinedReport += finalReportEntries.filter(Boolean).join("") || "No specific wound diagnoses generated.\n";
+            if (complaintIcdResult) {
+                combinedReport += "\n--- Chief Complaint Related Diagnoses ---\n";
+                combinedReport += `${complaintIcdResult}\n`;
+            }
             
-            $("#final-report-display").text(finalReportEntries.join(""));
+            $("#final-report-display").text(combinedReport);
             $("#loading-indicator").addClass("hidden");
         });
 
