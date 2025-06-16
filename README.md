@@ -14,7 +14,7 @@
 
 ## 如何使用
 
-1.  **輸入 API 金鑰**：首先，在「API Key」欄位輸入您的 Gemini API 金鑰。這是生成 ICD-10 編碼和病程記錄所必需的。
+1.  **輸入 API 金鑰**：首先，在「API Key」欄位輸入您的 Gemini API 金鑰。這是生成 ICD-10 編碼和病程記錄所必需的。取得網址:[https://aistudio.google.com/apikey]
 2.  **填寫主訴**：在「Chief Complaint」欄位記錄病患的主要症狀或受傷原因。
 3.  **新增傷口記錄**：
     *   在「Wound Details」區域，依序選擇傷口的「Side」（側邊）、「Body Region」（身體區域）和「Specific Part」（具體部位）。
