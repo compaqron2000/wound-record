@@ -668,8 +668,8 @@ Now, generate the complete and consistent chart note based on all the provided i
             updateWoundRecordsDisplay();
         });
 
-        $("#generate-icd-btn").on("click", async function() {
-             const apiKey = $("#api-key-input").val().trim();
+$("#generate-icd-btn").on("click", async function() {
+            const apiKey = $("#api-key-input").val().trim();
             if (!apiKey) {
                 showAlert("Please enter your Gemini API Key before generating ICD-10 codes.");
                 return;
@@ -679,7 +679,7 @@ Now, generate the complete and consistent chart note based on all the provided i
                 return;
             }
             $("#loading-indicator").removeClass("hidden");
-            $("#final-report-display").text("Generating...");
+            $("#final-report-display").text("Generating & Verifying..."); // 更新提示訊息
 
             // Process wound records
             let finalReportEntries = new Array(woundRecordObjects.length);
@@ -688,18 +688,49 @@ Now, generate the complete and consistent chart note based on all the provided i
             let recordsForGemini = [];
             let geminiIndexMap = [];
             nihResults.forEach((result, index) => {
-                if(result) {
+                if (result) {
                     finalReportEntries[index] = `ICD-10: ${result}\n`;
                 } else {
                     recordsForGemini.push(woundRecordObjects[index]);
                     geminiIndexMap.push(index);
                 }
             });
+
+            // 如果有需要 Gemini 處理的紀錄
             if (recordsForGemini.length > 0) {
+                // 1. 先從 Gemini 獲取初步結果
                 const geminiResults = await getIcd10ForMultipleRecords(recordsForGemini, apiKey);
-                geminiResults.forEach((result, i) => {
+
+                // 2. 準備對 Gemini 的結果進行二次驗證
+                const verificationPromises = geminiResults.map(geminiResult => {
+                    // 如果 Gemini 回傳錯誤或找不到，直接回傳原始錯誤訊息
+                    if (!geminiResult || geminiResult.includes("Error") || geminiResult.includes("Not Found")) {
+                        return Promise.resolve(geminiResult);
+                    }
+
+                    // 從 "CODE - NAME" 格式中提取 NAME 部分
+                    const parts = geminiResult.split(' - ');
+                    const description = parts.length > 1 ? parts.slice(1).join(' - ').trim() : geminiResult.trim();
+
+                    // 如果成功提取出描述，就用它來查詢 NIH API
+                    if (description) {
+                        return searchNihIcd10Api(description);
+                    } else {
+                        // 如果無法提取，則返回原始 Gemini 結果
+                        return Promise.resolve(geminiResult);
+                    }
+                });
+                
+                // 3. 等待所有二次驗證的查詢完成
+                const verifiedResults = await Promise.all(verificationPromises);
+
+                // 4. 整理最終結果
+                verifiedResults.forEach((finalResult, i) => {
                     const originalIndex = geminiIndexMap[i];
-                    finalReportEntries[originalIndex] = `ICD-10: ${result}\n`;
+                    // 如果二次驗證成功 (finalResult 不為 null)，就使用驗證後的結果
+                    // 否則，退回使用 Gemini 的原始結果作為備案
+                    const resultToShow = finalResult || geminiResults[i];
+                    finalReportEntries[originalIndex] = `ICD-10: ${resultToShow}\n`;
                 });
             }
 
@@ -713,7 +744,7 @@ Now, generate the complete and consistent chart note based on all the provided i
                 combinedReport += "\n--- Chief Complaint Related Diagnoses ---\n";
                 combinedReport += `${complaintIcdResult}\n`;
             }
-            
+
             $("#final-report-display").text(combinedReport);
             $("#loading-indicator").addClass("hidden");
         });
