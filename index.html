@@ -65,12 +65,20 @@
                   <!-- Dropdowns for Side, Region, Part -->
                   <div class="flex flex-col">
                     <label class="text-base font-medium leading-normal text-[#0e161b]">Side:</label>
-                    <select id="side-select" class="form-select w-full rounded-xl border border-[#d0dee7] bg-slate-50 p-2 text-base font-normal leading-normal text-[#0e161b] focus:border-[#1993e5] focus:outline-none focus:ring-0">
-                      <option value="Select Side">Select Side</option>
-                      <option value="N/A">N/A</option>
-                      <option value="Left">Left</option>
-                      <option value="Right">Right</option>
-                    </select>
+                    <div id="side-buttons" class="flex flex-wrap gap-2 py-2">
+                        <label class="side-btn-label text-base font-medium leading-normal flex items-center justify-center rounded-xl border border-[#d0dee7] px-4 h-11 text-[#0e161b] relative cursor-pointer">
+                            <input type="radio" name="side-type" value="Left" class="absolute opacity-0 w-0 h-0">
+                            <span class="flex items-center justify-center w-full h-full">Left</span>
+                        </label>
+                        <label class="side-btn-label text-base font-medium leading-normal flex items-center justify-center rounded-xl border border-[#d0dee7] px-4 h-11 text-[#0e161b] relative cursor-pointer">
+                            <input type="radio" name="side-type" value="Right" class="absolute opacity-0 w-0 h-0">
+                            <span class="flex items-center justify-center w-full h-full">Right</span>
+                        </label>
+                        <label class="side-btn-label text-base font-medium leading-normal flex items-center justify-center rounded-xl border border-[#d0dee7] px-4 h-11 text-[#0e161b] relative cursor-pointer">
+                            <input type="radio" name="side-type" value="N/A" class="absolute opacity-0 w-0 h-0">
+                            <span class="flex items-center justify-center w-full h-full">N/A</span>
+                        </label>
+                    </div>
                   </div>
                   <div class="flex flex-col">
                     <label class="text-base font-medium leading-normal text-[#0e161b]">Body Region:</label>

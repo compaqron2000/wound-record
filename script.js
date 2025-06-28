@@ -5,7 +5,7 @@ const bodyPartsByRegion = {
     "Upper Extremity": ["Shoulder", "Upper Arm", "Elbow", "Forearm", "Wrist", "Hand", "Finger"],
     "Lower Extremity": ["Hip", "Thigh", "Knee", "Lower Leg", "Ankle", "Foot", "Toe"],
 };
-const injuryTypes = ["Abrasion", "Contusion", "Laceration", "Swelling", "Deformity", "Avulsion", "Fracture", "Burn", "Puncture wound", "Degloving injury", "Pain but no open wound", "Crush injury"];
+const injuryTypes = ["Abrasion", "Contusion", "Laceration", "Swelling", "Deformity", "Avulsion", "Fracture", "Burn", "Puncture wound", "Skin defect", "Pain but no open wound", "Crush injury"];
 
 const chartTemplate = `1. Trauma History
 Mechanism:
@@ -160,8 +160,18 @@ function updateWoundRecordsDisplay() {
     });
 }
 
+function getMappedQuery(query) {
+    let mappedQuery = query;
+    mappedQuery = mappedQuery.replace(/Swelling/gi, 'contusion');
+    mappedQuery = mappedQuery.replace(/pain but no open wound/gi, 'contusion');
+    mappedQuery = mappedQuery.replace(/deformity/gi, 'other injury');
+    mappedQuery = mappedQuery.replace(/Skin defect/gi, 'open wound');
+    mappedQuery = mappedQuery.replace(/Crush injury/gi, 'open wound');
+    return mappedQuery;
+}
+
 async function searchNihIcd10Api(query) {
-    let searchTerms = query.replace(/^- /, "").trim();
+    let searchTerms = getMappedQuery(query).replace(/^- /, "").trim();
     if (searchTerms.toLowerCase().includes('head')) {
        searchTerms = searchTerms.replace(/head/i, 'unspecified part of head');
     }
@@ -187,7 +197,7 @@ async function searchNihIcd10Api(query) {
 
 async function getIcd10ForMultipleRecords(recordsToQuery, apiKey) {
     if (recordsToQuery.length === 0) return [];
-    const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${record.displayText.trim()}`).join('\n');
+    const promptText = recordsToQuery.map((record, index) => `${index + 1}. ${getMappedQuery(record.displayText.trim())}`).join('\n');
     const prompt = `For each numbered wound description below, provide the most likely ICD-10 code and its official short name for an initial encounter. Assume fractures are non-displaced unless specified otherwise. Respond only with a numbered list in the format: "1. CODE - NAME". Important: When "head" is mentioned, it refers to the anatomical head (cranial region), not the head of an organ like the pancreas.if "chest" is mentioned, it refers to thorax, not breast.If you cannot find a code, respond with "Not Found".\n\n${promptText}`;
     try {
         const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
@@ -336,13 +346,13 @@ $("#custom-alert-ok").on("click", () => $('#custom-alert-modal').addClass("hidde
 
 
 $("#add-wound-record-btn").on("click", function() {
-    const side = $("#side-select").val();
+    const side = $('input[name="side-type"]:checked').val();
     const bodyRegion = $("#body-region-select").val();
     const specificBodyPart = $("#specific-body-part-select").val();
     const injuryType = $('input[name="injury-type"]:checked').val();
     const woundDescriptions = $("#wound-description-fields").find("textarea").map((_, el) => $(el).val().trim()).get().filter(d => d);
 
-    if (side === "Select Side" || bodyRegion === "Select Region" || specificBodyPart === "Select Part" || !injuryType) {
+    if (!side || bodyRegion === "Select Region" || specificBodyPart === "Select Part" || !injuryType) {
         showAlert("Please ensure Side, Body Region, Specific Part, and an Injury Type are selected!");
         return;
     }
@@ -360,7 +370,6 @@ $("#add-wound-record-btn").on("click", function() {
     $("#wound-description-fields").empty();
     woundDescriptionCounter = 0;
     addWoundDescriptionField();
-    $('input[name="injury-type"]:checked').prop('checked', false);
 });
 
 $('#add-custom-entry-btn').on('click', function() {
@@ -510,7 +519,7 @@ $("#clear-all-records-btn").on("click", async function() {
         $("#final-report-display").text("Click \"Generate ICD-10\" after adding records.");
          $("#final-chart-display").val("");
          $("#chief-complaint").val("");
-        $("#side-select").val("Select Side");
+        $('input[name="side-type"]:checked').prop('checked', false);
         $("#body-region-select").val("Select Region");
         updateSpecificBodyPartSelect();
         $('input[name="injury-type"]:checked').prop('checked', false);
