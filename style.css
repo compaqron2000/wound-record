@@ -1,0 +1,83 @@
+/* --- Custom Styles --- */
+.wound-type-label {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.wound-type-label span {
+  transition: color 0.2s ease-in-out;
+}
+.wound-type-label:has(input[type="radio"]:checked) {
+  background-color: #1993e5;
+  border-color: #1993e5;
+}
+.wound-type-label:has(input[type="radio"]:checked) span {
+  color: #fff;
+}
+.wound-type-label input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  width: 400px;
+  text-align: center;
+}
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.modal-button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+.modal-button.primary {
+  background-color: #1993e5;
+  color: #fff;
+}
+.modal-button.primary:hover {
+  background-color: #147ac2;
+}
+.modal-button.secondary {
+  background-color: #e7eef3;
+  color: #0e161b;
+  border: 1px solid #d0dee7;
+}
+.modal-button.secondary:hover {
+  background-color: #dbe2e9;
+}
+.hidden {
+  display: none;
+}
+#wound-records-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* Reduced gap between items */
+}
+.record-item {
+   padding-top: 0.25rem;
+   padding-bottom: 0.25rem;
+}
