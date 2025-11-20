@@ -202,7 +202,7 @@ async function getIcd10ForMultipleRecords(recordsToQuery, apiKey) {
     try {
         const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
         const payload = { contents: chatHistory };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
         
         const response = await fetch(apiUrl, {
             method: 'POST',
