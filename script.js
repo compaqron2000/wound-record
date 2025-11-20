@@ -254,7 +254,7 @@ Chief Complaint: "${complaint}"`;
      try {
         const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
         const payload = { contents: chatHistory };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
         
         const response = await fetch(apiUrl, {
             method: 'POST',
@@ -309,7 +309,7 @@ Now, generate the complete and consistent chart note based on all the provided i
     try {
          const chatHistory = [{ role: "user", parts: [{ text: finalPrompt }] }];
         const payload = { contents: chatHistory };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
         
         const response = await fetch(apiUrl, {
             method: 'POST',
